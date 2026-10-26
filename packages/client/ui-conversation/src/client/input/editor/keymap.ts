@@ -1,7 +1,8 @@
 /**
  * Composer keymap over the Lexical command layer: menu arbitration
  * (arrows/escape/enter), space adjudication, the Enter submit gesture, and
- * paste routing. Registered at CRITICAL priority so it decides before
+ * paste routing from ClipboardEvent.clipboardData or InputEvent.dataTransfer.
+ * Registered at CRITICAL priority so it decides before
  * @lexical/plain-text's own Enter/paste defaults; a handler returning false
  * falls through to those defaults (Shift+Enter's line break, ordinary
  * spaces, text paste the bar routes itself).
@@ -279,23 +280,31 @@ export function registerComposerKeymap(editor: LexicalEditor, handlers: Composer
       return true
     }, COMMAND_PRIORITY_CRITICAL),
     editor.registerCommand(PASTE_COMMAND, (event) => {
-      // Duck-typed: the payload union includes InputEvent, and test engines
-      // deliver clipboardData on plain events.
-      const clipboardData = (event as ClipboardEvent).clipboardData ?? null
-      if (clipboardData === null) return false
+      // Lexical also routes beforeinput insertFromPaste through this command.
+      const dataTransfer = ('clipboardData' in event ? event.clipboardData : null)
+        ?? ('dataTransfer' in event ? event.dataTransfer : null)
+        ?? null
+      if (dataTransfer === null) return false
       const files: File[] = []
       const directories = new Set<File>()
-      for (const item of clipboardData.items) {
-        if (item.kind !== 'file') continue
-        const file = item.getAsFile()
-        if (file === null) continue
-        files.push(file)
-        if (typeof item.webkitGetAsEntry === 'function' && item.webkitGetAsEntry()?.isDirectory === true) {
-          directories.add(file)
+      // Some browser paste payloads omit items despite the DOM declaration.
+      // oxlint-disable-next-line typescript/no-unnecessary-condition
+      if (dataTransfer.items?.length) {
+        for (const item of dataTransfer.items) {
+          if (item.kind !== 'file') continue
+          const file = item.getAsFile()
+          if (file === null) continue
+          files.push(file)
+          if (typeof item.webkitGetAsEntry === 'function' && item.webkitGetAsEntry()?.isDirectory === true) {
+            directories.add(file)
+          }
         }
+      } else {
+        // The same files can appear in both collections; use only one source.
+        files.push(...Array.from(dataTransfer.files))
       }
       if (files.length > 0) handlers.intakeFiles(files, directories.size === 0 ? undefined : directories)
-      const text = clipboardData.getData('text/plain')
+      const text = dataTransfer.getData('text/plain')
       if (text === '') {
         if (files.length === 0) return false
         event.preventDefault()

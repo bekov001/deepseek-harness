@@ -12,11 +12,19 @@
 
 .dock {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
   gap: 12px;
-  max-width: 100%;
+  width: 100%;
+  max-width: var(--dsh-composer-card-max-width);
+  min-width: 0;
   padding-top: 4px;
+}
+
+.root .dock > * {
+  max-width: 100%;
+  min-width: 0;
 }
 
 .hero .dock:empty {
@@ -286,10 +294,36 @@
 
 .tools,
 .modes,
-.trailing {
+.trailing,
+.standardControls {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   min-width: 0;
+  max-width: 100%;
+}
+
+/* Wrap controls at their natural width before compressing their labels. */
+.tools > *,
+.modes > *,
+.standardControls > * {
+  flex-shrink: 0;
+  max-width: 100%;
+}
+
+/* A single oversized plugin label may use the available line width. */
+.tools > button,
+.modes > button,
+.standardControls > button,
+.tools > * > button,
+.modes > * > button,
+.standardControls > * > button {
+  min-width: 0;
+  max-width: 100%;
+  min-height: 28px;
+  height: auto;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 /* figma 75:8208 drew 16 between + and the mode chips and 4 between Plan /
@@ -303,6 +337,10 @@
   gap: 12px;
 }
 
+.standardControls {
+  gap: 12px;
+}
+
 .trailing {
   flex: none;
   /* Wrap keeps the left mode chips and the right controls apart when the card
@@ -311,6 +349,7 @@
      model trigger (external:107). The auto margin re-anchors it right on the
      wrapped line; on a single line space-between already pins it right. */
   margin-left: auto;
+  justify-content: flex-end;
   gap: 12px;
 }
 
@@ -318,7 +357,8 @@
 @container (max-width: 560px) {
   .tools,
   .modes,
-  .trailing {
+  .trailing,
+  .standardControls {
     gap: 8px;
   }
 }
@@ -429,9 +469,8 @@
   cursor: pointer;
 }
 
-.standardControls { display: flex; align-items: center; gap: 12px; min-width: 0; }
 .tools[hidden], .standardControls[hidden] { display: none; }
-.trailingActive { flex: 1; margin-left: 0; }
+.trailingActive { flex: 1; flex-wrap: nowrap; margin-left: 0; }
 .activity { display: flex; align-items: center; flex: none; }
 .activity:empty { display: none; }
 .activityExpanded { flex: 1; min-width: 0; }

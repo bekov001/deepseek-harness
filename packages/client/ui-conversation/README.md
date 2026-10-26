@@ -180,6 +180,8 @@ The selector must be a pure function of the owner currency. Its non-null return 
 
 `InputActions.captureInsertion()` captures the draft selection and revision; `insertText(text, span)` inserts one undoable plain-text edit only while that revision is current and the editor permits editing. Asynchronous consumers retain rejected results for user action.
 
+The composer toolbar wraps its control groups and their controls when space is limited, preserving natural button widths and right-aligned Send and Stop actions. A label wider than the available line can wrap within its button. The footer dock spans the composer width and wraps statistics and context controls onto additional lines.
+
 `conversation.input.activity` hosts one control between the model selector and Send. Its `onActiveChange` callback expands that control across the toolbar and hides ordinary accessory controls and the context meter while preserving the editor and submit action. Closing the activity restores those controls with context details closed. The empty hero dock remains collapsed when it has no content. The occupant releases expansion on unmount and owns any activity-specific feedback.
 
 <a id="model-experience"></a>
@@ -197,6 +199,7 @@ None; Conversation assembly and browser input state do not alter provider-side p
 
 - **Only registered targets can render** — the shell deliberately has no implicit fallback target beyond the registered `chat` preference.
 - **Factory occurrences inherit their render-position Session** — `conversation.content` does not accept an independently addressed Session; that requires a separate Session-provider capability.
+- **Image paste depends on browser delivery** — the composer accepts files from `paste` clipboard data and `beforeinput` paste transfer data, retaining file order and directory checks; a missing or empty item list falls back to the transfer's file list. Some Android browser and keyboard combinations reject an image before delivering either event. In an ordinary Session, use the existing File command to select the image instead; the composer cannot recover a file the browser withholds.
 
 
 <a id="dev-note"></a>

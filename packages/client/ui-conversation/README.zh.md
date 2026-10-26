@@ -180,6 +180,8 @@ selector 必须是 owner currency 的纯函数。非 null 返回值作为 `match
 
 `InputActions.captureInsertion()` 捕获草稿选区与版本；`insertText(text, span)` 仅在版本未变且编辑器允许编辑时，插入一次可撤销的纯文本编辑。异步消费者在插入被拒绝后负责保留结果，等待用户操作。
 
+Composer 工具栏在空间不足时将控件组及组内控件换行，保留按钮的自然宽度，并让 Send 和 Stop 操作靠右对齐。标签超过可用行宽时，可在按钮内换行。底部 dock 使用 composer 的完整宽度，将统计信息与上下文控件换行展示。
+
 `conversation.input.activity` 在模型选择器与发送按钮之间承载一个控件。其 `onActiveChange` 回调将控件展开至整条工具栏并隐藏普通辅助控件和上下文用量按钮，同时保留编辑器与提交按钮。关闭活动后恢复这些控件，上下文详情保持关闭。首页输入框下方没有内容时，该区域保持收起。占用者在卸载时释放展开状态，并拥有活动专属反馈。
 
 <a id="model-experience"></a>
@@ -197,6 +199,7 @@ selector 必须是 owner currency 的纯函数。非 null 返回值作为 `match
 
 - **只有已注册 target 可以渲染**——除已注册的 `chat` 偏好外，shell 刻意不提供隐式 fallback target。
 - **Factory occurrence 继承渲染位置的 Session**——`conversation.content` 不接受独立寻址的 Session；该能力需要单独的 Session provider。
+- **图片粘贴依赖浏览器交付**——composer 接受 `paste` 剪贴板数据和 `beforeinput` 粘贴传输数据中的文件，保留文件顺序与目录校验；项目列表缺失或为空时，改用传输数据的文件列表。部分 Android 浏览器与键盘组合会在发出这两种事件之前拒绝图片。普通 Session 可通过现有的「文件」命令选择图片；composer 无法恢复浏览器未交付的文件。
 
 
 <a id="dev-note"></a>
