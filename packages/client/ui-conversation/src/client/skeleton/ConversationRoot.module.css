@@ -156,6 +156,15 @@
   cursor: default;
 }
 
+/* Lower only the current Session title on narrow screens while preserving its
+   total box height, so sibling controls and tabs keep their positions. */
+@media (max-width: 600px) {
+  .crumb.crumbCurrent {
+    padding-block-start: 8px;
+    padding-block-end: 0;
+  }
+}
+
 .headerActions {
   display: flex;
   flex: none;
